@@ -36,6 +36,7 @@ static void run_preboot_environment_command(void)
 	}
 }
 
+///NOTE
 /* We come here after U-Boot is initialised and ready to process commands */
 void main_loop(void)
 {
@@ -48,6 +49,7 @@ void main_loop(void)
 
 	cli_init();
 
+///NOT RUN
 	if (IS_ENABLED(CONFIG_USE_PREBOOT))
 		run_preboot_environment_command();
 
@@ -56,7 +58,8 @@ void main_loop(void)
 
 	if (IS_ENABLED(CONFIG_EFI_CAPSULE_ON_DISK_EARLY))
 		efi_launch_capsules();
-
+///
+	// s is bootcmd
 	s = bootdelay_process();
 	if (cli_process_fdt(&s))
 		cli_secure_boot_cmd(s);
@@ -66,3 +69,4 @@ void main_loop(void)
 	cli_loop();
 	panic("No CLI available");
 }
+///

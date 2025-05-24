@@ -436,6 +436,7 @@ static void process_fdt_options(const void *blob)
 #endif /* CONFIG_SYS_TEXT_BASE */
 }
 
+///NOTE
 const char *bootdelay_process(void)
 {
 	char *s;
@@ -463,7 +464,8 @@ const char *bootdelay_process(void)
 	if (bootcount_error())
 		s = env_get("altbootcmd");
 	else
-		s = env_get("bootcmd");
+		s = env_get("bootcmd"); 
+		// Get bootcmd env to know what things should do by U-Boot itself
 
 	if (IS_ENABLED(CONFIG_OF_CONTROL))
 		process_fdt_options(gd->fdt_blob);
@@ -471,6 +473,7 @@ const char *bootdelay_process(void)
 
 	return s;
 }
+///
 
 void autoboot_command(const char *s)
 {

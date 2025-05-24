@@ -36,10 +36,12 @@
  *    ones allocated by board_init_f() in system RAM, but BSS and
  *    initialized non-const data are still not available.
  *
+///NOTE
  * 4a.For U-Boot proper (not SPL), call relocate_code(). This function
  *    relocates U-Boot from its current location into the relocation
  *    destination computed by board_init_f().
  *
+///
  * 4b.For SPL, board_init_f() just returns (to crt0). There is no
  *    code relocation in SPL.
  *
@@ -105,6 +107,7 @@ ENTRY(_main)
 	mov	sp, r0
 	bl	board_init_f_alloc_reserve
 	mov	sp, r0
+	/* NOTE: r9 register is used to store the data, which is "gd" */
 	/* set up gd here, outside any C code */
 	mov	r9, r0
 	bl	board_init_f_init_reserve
@@ -118,6 +121,7 @@ ENTRY(_main)
 #endif
 
 	mov	r0, #0
+	/* Entry point of SPL, TPL and U-Boot */
 	bl	board_init_f
 
 #if ! defined(CONFIG_SPL_BUILD)
@@ -147,6 +151,7 @@ ENTRY(_main)
 #if defined(CONFIG_CPU_V7M)
 	orr	lr, #1				/* As required by Thumb-only */
 #endif
+	/* NOTE: GD_RELOCADDR is relocation address of U-Boot */
 	ldr	r0, [r9, #GD_RELOCADDR]		/* r0 = gd->relocaddr */
 	b	relocate_code
 here:

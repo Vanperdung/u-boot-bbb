@@ -627,6 +627,7 @@ static init_fnc_t init_sequence_r[] = {
 #endif
 #if defined(CONFIG_ARM) || defined(CONFIG_NDS32) || defined(CONFIG_RISCV) || \
 	defined(CONFIG_SANDBOX)
+	// Call basic board specific setup (e.g. AM335x for BBB)
 	board_init,	/* Setup chipselects */
 #endif
 	/*
@@ -818,9 +819,11 @@ void board_init_r(gd_t *new_gd, ulong dest_addr)
 	for (i = 0; i < ARRAY_SIZE(init_sequence_r); i++)
 		init_sequence_r[i] += gd->reloc_off;
 #endif
-
+///NOTE
+// Peform works listed in init_sequence_r function pointer array
 	if (initcall_run_list(init_sequence_r))
 		hang();
+///
 
 	/* NOTREACHED - run_main_loop() does not return */
 	hang();

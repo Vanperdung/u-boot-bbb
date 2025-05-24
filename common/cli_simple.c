@@ -281,6 +281,7 @@ void cli_simple_loop(void)
 			 */
 			bootretry_reset_cmd_timeout();
 		}
+		// Read the input command from prompt
 		len = cli_readline(CONFIG_SYS_PROMPT);
 
 		flag = 0;	/* assume no special flags for now */
@@ -307,6 +308,7 @@ void cli_simple_loop(void)
 			puts("<INTERRUPT>\n");
 		else
 			rc = run_command_repeatable(lastcommand, flag);
+			// Run the input command which is store in lastcommand buffer
 
 		if (rc <= 0) {
 			/* invalid command or not repeatable, forget it */
