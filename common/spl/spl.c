@@ -583,6 +583,7 @@ __weak void board_boot_order(u32 *spl_boot_list)
 
 static struct spl_image_loader *spl_ll_find_loader(uint boot_device)
 {
+	// u_boot_list_2_spl_image_loader_1
 	struct spl_image_loader *drv =
 		ll_entry_start(struct spl_image_loader, spl_image_loader);
 	const int n_ents =
@@ -613,6 +614,9 @@ static int spl_load_image(struct spl_image_info *spl_image,
 	bootdev.boot_device = loader->boot_device;
 	bootdev.boot_device_name = NULL;
 
+	// Call the loader to load the image
+	// See u-boot-spl.map to find the loader function
+	// In BBB, it is spl_mmc_load_image in spl_mmc.c
 	ret = loader->load_image(spl_image, &bootdev);
 #ifdef CONFIG_SPL_LEGACY_IMAGE_CRC_CHECK
 	if (!ret && spl_image->dcrc_length) {

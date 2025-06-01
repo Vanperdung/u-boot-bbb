@@ -77,6 +77,19 @@ static __maybe_unused unsigned long spl_mmc_raw_uboot_offset(int part)
 	return 0;
 }
 
+/*
+ * mmc_load_image_raw_sector() - Load an image from a raw sector
+ *
+ * @spl_image:	Pointer to the spl_image_info structure to fill in
+ * @bootdev:	Pointer to the boot device information
+ * @mmc:	Pointer to the MMC device structure
+ * @sector:	Sector number to read from
+ *
+ * Returns 0 on success, -1 on error.
+ *
+ * This function reads an image header from the specified sector and loads the
+ * image into memory. It supports both FIT and legacy images.
+*/
 static __maybe_unused
 int mmc_load_image_raw_sector(struct spl_image_info *spl_image,
 			      struct spl_boot_device *bootdev,
@@ -98,7 +111,7 @@ int mmc_load_image_raw_sector(struct spl_image_info *spl_image,
 	}
 
 	if (IS_ENABLED(CONFIG_SPL_LOAD_FIT) &&
-	    image_get_magic(header) == FDT_MAGIC) {
+	    image_get_magic(header) == FDT_MAGIC) { // FIT image
 		struct spl_load_info load;
 
 		debug("Found FIT\n");
@@ -107,7 +120,7 @@ int mmc_load_image_raw_sector(struct spl_image_info *spl_image,
 		load.filename = NULL;
 		load.bl_len = mmc->read_bl_len;
 		load.read = h_spl_load_read;
-		ret = spl_load_simple_fit(spl_image, &load, sector, header);
+		ret = spl_load_simple_fit(spl_image, &load, sector, header); // Load FIT image
 	} else if (IS_ENABLED(CONFIG_SPL_LOAD_IMX_CONTAINER)) {
 		struct spl_load_info load;
 
@@ -119,7 +132,7 @@ int mmc_load_image_raw_sector(struct spl_image_info *spl_image,
 
 		ret = spl_load_imx_container(spl_image, &load, sector);
 	} else {
-		ret = mmc_load_legacy(spl_image, bootdev, mmc, sector, header);
+		ret = mmc_load_legacy(spl_image, bootdev, mmc, sector, header); // Load legacy image which is using the U-Boot image header
 	}
 
 end:
@@ -391,6 +404,7 @@ int spl_mmc_load(struct spl_image_info *spl_image,
 		if (err)
 			return err;
 
+		// Initialize the MMC device, it means that MMC is not initialized before the loader function is called
 		err = mmc_init(mmc);
 		if (err) {
 			mmc = NULL;
@@ -438,6 +452,8 @@ int spl_mmc_load(struct spl_image_info *spl_image,
 			return err;
 #endif
 #ifdef CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_USE_SECTOR
+		// If we are in raw mode, we need to load the u-boot image from the raw sector
+		// This is the case we are using in BBB
 		err = mmc_load_image_raw_sector(spl_image, bootdev, mmc,
 				raw_sect + spl_mmc_raw_uboot_offset(part));
 		if (!err)
@@ -476,12 +492,13 @@ int spl_mmc_load_image(struct spl_image_info *spl_image,
 			    0,
 #endif
 #ifdef CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR
-			    CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR);
+			    CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR); // CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR is the u-boot location in the mmc
 #else
 			    0);
 #endif
 }
 
+// Register the MMC loader methods
 SPL_LOAD_IMAGE_METHOD("MMC1", 0, BOOT_DEVICE_MMC1, spl_mmc_load_image);
 SPL_LOAD_IMAGE_METHOD("MMC2", 0, BOOT_DEVICE_MMC2, spl_mmc_load_image);
 SPL_LOAD_IMAGE_METHOD("MMC2_2", 0, BOOT_DEVICE_MMC2_2, spl_mmc_load_image);
